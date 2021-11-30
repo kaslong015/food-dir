@@ -50,13 +50,13 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% if product %}
-                            {% for product in product %}
+                            {% if products %}
+                            {% for product in products %}
                             <tr>
                                 <td class="serial">{{ forloop.counter }}</td>
                                 <td>{{ product.name }}</td>
                                 <td>{{ product.price }}</td>
-                                <td>{{ product.restaurant}}</td>
+                                <td>{{ restaurant }}</td>
                                 <td>{{ product.drink}}</td>
                                 <td>{{ product.created_date }}</td>
                             </tr>

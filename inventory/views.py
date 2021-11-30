@@ -1,20 +1,18 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from store.models import Restaurant
 
 from store.models import *
 
 
 @login_required(login_url='login')
 def dashboard(request):
-    total_product = Product.objects.count()
-    # total_supplier = Supplier.objects.count()
-    # total_buyer = Buyer.objects.count()
+    total_product = Product.objects.all().filter(user=request.user).count()
+
     total_oder = Order.objects.count()
     orders = Order.objects.all().order_by('-id')
     context = {
         'product': total_product,
-        # 'supplier': total_supplier,
-        # 'buyer': total_buyer,
         'order': total_oder,
         'orders': orders
     }
@@ -22,4 +20,6 @@ def dashboard(request):
 
 
 def homePage(requst):
-    return render(requst, 'home.html')
+    restaurant = Restaurant.objects.all().order_by('-id')[:3]
+    context = {'restaurant': restaurant}
+    return render(requst, 'home.html', context)

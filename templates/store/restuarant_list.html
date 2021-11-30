@@ -45,6 +45,7 @@
                                 <th>Name</th>
                                 <th>Address</th>
                                 <th>Date</th>
+                                <th>Operation</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -55,6 +56,8 @@
                                 <td>{{ restuarant.name }}</td>
                                 <td>{{ restuarant.address }}</td>
                                 <td>{{ restuarant.created_date }}</td>
+                                <td><a href="{% url 'editrest' restuarant.id %}" class="btn btn-success btn-sm">Edit</a>
+                                </td>
                             </tr>
                             {% endfor %}
                             {% else %}

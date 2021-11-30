@@ -1,19 +1,20 @@
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 from users.models import User
 from .models import (
     Product,
     Order,
-    Delivery,
+
     Food,
     Restaurant
 )
 from .forms import (
     ProductForm,
     OrderForm,
-    DeliveryForm,
+
     FoodForm,
     RestuarantForm
 )
@@ -23,15 +24,12 @@ def createFood(request):
     forms = FoodForm()
     context = {}
     if request.method == 'POST':
-        forms = FoodForm(request.POST)
+        forms = FoodForm(request.POST, request.FILES)
         if forms.is_valid():
-            Job = forms.save(commit=False)
-            # print(request.user)
-            print(type(Restaurant.objects.all()))
-                # print(i.name)
-
-            # print(Job.restaurant)
-            # Job.save()
+            instance = forms.save(commit=False)
+            instance.user = request.user
+            instance.save()
+            return redirect('food-list')
 
     context = {'form': forms}
     return render(request, 'store/createfood.html', context)
@@ -41,6 +39,7 @@ def createFood(request):
 @ login_required(login_url='login')
 def create_product(request):
     forms = ProductForm()
+
     if request.method == 'POST':
         forms = ProductForm(request.POST)
         if forms.is_valid():
@@ -61,12 +60,11 @@ class ProductListView(ListView):
     context_object_name = 'product'
 
 
-class FoodListView(ListView):
-    model = Food
-    template_name = 'store/food_list.html'
-    context_object_name = 'product'
-
-# Order views
+def FoodListView(request):
+    products = Food.objects.filter(user=request.user)
+    rest = Restaurant.objects.get(user=request.user)
+    context = {'products': products, 'restaurant': rest.name}
+    return render(request, 'store/food_list.html', context)
 
 
 @ login_required(login_url='login')
@@ -93,28 +91,12 @@ class OrderListView(ListView):
         return context
 
 
-# Delivery views
-@ login_required(login_url='login')
-def create_delivery(request):
-    forms = DeliveryForm()
-    if request.method == 'POST':
-        forms = DeliveryForm(request.POST)
-        if forms.is_valid():
-            forms.save()
-            return redirect('delivery-list')
-    context = {
-        'form': forms
-    }
-    return render(request, 'store/create_delivery.html', context)
-
-
 @ login_required(login_url='login')
 def create_restuarant(request):
     forms = RestuarantForm()
-    context = {}
-
+    print(request.POST)
     if request.method == "POST":
-        forms = RestuarantForm(request.POST)
+        forms = RestuarantForm(request.POST, request.FILES)
         if forms.is_valid():
             instance = forms.save(commit=False)
             instance.user = request.user
@@ -125,13 +107,25 @@ def create_restuarant(request):
     return render(request, 'store/create_restuarant.html', context)
 
 
-class DeliveryListView(ListView):
-    model = Delivery
-    template_name = 'store/delivery_list.html'
-    context_object_name = 'delivery'
-
-
 class RestuarantListView(ListView):
     model = Restaurant
     template_name = 'store/restuarant_list.html'
     context_object_name = 'restuarant'
+
+    def get_queryset(self):
+        return Restaurant.objects.filter(user=self.request.user)
+
+
+def editRestDatails(request, pk):
+    record = Restaurant.objects.get(id=pk)
+    form = RestuarantForm(instance=record)
+
+    if request.method == "POST":
+        form = RestuarantForm(request.POST, instance=record)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'successful')
+            return redirect('restuarant-list')
+
+    context = {'form': form}
+    return render(request, 'store/update_rest.html', context)
