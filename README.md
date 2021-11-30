@@ -1,4 +1,4 @@
-# inventory-management
+# food directory
 This is a inventory management system
 
 # How to Setup
